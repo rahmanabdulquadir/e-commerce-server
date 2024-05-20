@@ -1,0 +1,24 @@
+{
+  "name": "e-commerce-app-server",
+  "version": "1.0.0",
+  "description": "e-commerce backend based on express, mongodb, mongoose and zod for validation.",
+  "main": "./dist/server.js",
+  "scripts": {
+    "start:dev": "ts-node-dev --respawn --transpile-only ./src/app.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rahman Abdul Quadir",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "nodemon": "^3.1.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}
