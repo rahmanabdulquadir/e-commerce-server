@@ -1,41 +1,31 @@
-import { Schema, model, } from "mongoose";
+import { Schema, model } from "mongoose";
 import { TInventory, TProduct, TVariant } from "./product.interface";
 
-const variantSchema = new Schema<TVariant>({
-  type: {
-    type: String,
-    required: true
-  },
-  value: {
-    type: String,
-    required: true
-  }
-})
 
-const inventorySchema = new Schema<TInventory>({
-  quantity: {
-    type: Number,
-    required: true
-  },
-  inStock: {
-    type: Boolean,
-    required: true
-  }
-})
+const variantSchema: Schema<TVariant> = new Schema({
+  type: { type: String, required: true },
+  value: { type: String, required: true },
+});
 
+
+
+const inventorySchema: Schema<TInventory> = new Schema({
+  quantity: { type: Number, required: true },
+  inStock: { type: Boolean, required: true },
+});
 
 // main schema
 
-const productSchema = new Schema<TProduct>({
- // Product Schema
+//  // Product Schema
 
+const productSchema: Schema<TProduct> = new Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
   category: { type: String, required: true },
   tags: { type: [String], required: true },
-  variants: { type: [variantSchema],},
-  inventory: { type: inventorySchema,}
-})
+  variants: { type: [variantSchema], required: true },
+  inventory: { type: inventorySchema, required: true },
+});
 
-export const product = model<TProduct>("product", productSchema)
+export const Product = model<TProduct>("product", productSchema);
