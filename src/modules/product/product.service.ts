@@ -19,23 +19,45 @@ const getProductFromDB = async (id: string) => {
 
 const deleteProductFromDB = async (id: string) => {
   try {
-    // Check if the id is a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error('Invalid product ID');
-    }
-
-    // Convert the string id to an ObjectId
     const objectId = new mongoose.Types.ObjectId(id);
 
-    // Perform the update operation
-    const result = await Product.updateOne({ _id: objectId },);
+    const result = await Product.findByIdAndDelete(objectId);
 
-    console.log('Delete result:', result);
-
-    // Return the result of the update operation
     return result;
   } catch (error) {
     console.error('Error deleting product:', error);
+    throw error;
+  }
+};
+
+
+const searchProducts = async (searchTerm: string) => {
+  const regex = new RegExp(searchTerm, 'i');  // 'i' makes the search case-insensitive
+  const result = await Product.find({
+    $or: [
+      { name: { $regex: regex } },
+      { description: { $regex: regex } },
+      { category: { $regex: regex } },
+      { tags: { $in: [regex] } },
+    ],
+  });
+  return result;
+};
+
+
+const updateProductInDB = async (id: string, productData: any) => {
+  try {
+    const objectId = new mongoose.Types.ObjectId(id);
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      objectId,
+      { $set: productData },
+      { new: true, runValidators: true }
+    );
+
+    return updatedProduct;
+  } catch (error) {
+    console.error('Error updating product:', error);
     throw error;
   }
 };
@@ -45,4 +67,6 @@ export const ProductServices = {
   getAllProducts,
   getProductFromDB,
   deleteProductFromDB,
+  searchProducts,
+  updateProductInDB,
 }
