@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { OrderServices } from "./order.service";
 import OrderValidationSchema from "./order.validation";
+import { TOrder } from "./order.interface";
+import { Product } from "../product/product.model";
+import { Order } from "./order.model";
+import { ZodError } from "zod";
+
 
 const createOrder = async (req: Request, res: Response) => {
-  // const { email, productId, quantity } = req.body;
-
-
-
   try {
    
     // zod validation
@@ -27,41 +28,73 @@ const createOrder = async (req: Request, res: Response) => {
   }
 };
 
-const getAllOrders = async (req: Request, res: Response) => {
+const createOrderController = async (req: Request, res: Response) => {
   try {
-    const result = await OrderServices.getAllOrders();
+    const orderData = req.body;
+    // console.log(orderData)
 
+    // Create order
+    const result = await OrderServices.createOrderToUpdate(orderData);
+    console.log(result)
+
+    // Send success response
     res.status(200).json({
       success: true,
-      message: "Orders fetched successfully!",
+      message: "Order created successfully!",
       data: result,
     });
-  } catch (err: any) {
-    res.status(500).json({
-      success: false,
-      message: "Could not fetch products",
-      error: err,
-    });
+  } catch (error: any) {
+    if (error.message === "Product not found") {
+      console.log(error)
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    } else if (error.message === "Insufficient quantity available in inventory") {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient quantity available in inventory",
+      });
+    } else if (error.issues) {
+      // Zod validation error
+      return res.status(400).json({
+        success: false,
+        message: error.issues[0].message || "Validation error",
+        error: error,
+      });
+    } else {
+      // General error
+      return res.status(500).json({
+        success: false,
+        message: "Something went wrong",
+        error: error,
+      });
+    }
   }
 };
 
-const getOrdersByEmail = async (req: Request, res: Response) => {
-  const { email } = req.query;
 
-  if (!email || typeof email !== "string") {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid or missing email parameter",
-    });
-  }
 
+
+// get order based controller 
+const getAllOrders = async (req: Request, res: Response) => {
   try {
-    const orders = await OrderServices.getOrdersByEmailFromDB(email);
-    res.status(200).json({
-      success: true,
-      message: "Orders fetched successfully for user email!",
-      data: orders,
-    });
+    const email = req.query.email as string | undefined;
+    const orders = await OrderServices.getOrders(email);
+
+    if (email) {
+      res.json({
+        success: true,
+        message: `Orders fetched successfully for user email '${email}'!`,
+        data: orders,
+      });
+    } else {
+      res.json({
+        success: true,
+        message: "Orders fetched successfully!",
+        data: orders,
+      });
+    }
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -71,8 +104,10 @@ const getOrdersByEmail = async (req: Request, res: Response) => {
   }
 };
 
+
+
 export const OrderControllers = {
+  createOrderController,
   createOrder,
   getAllOrders,
-  getOrdersByEmail,
 };
