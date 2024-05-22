@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { Product } from "../product/product.model";
 import { TOrder } from "./order.interface";
 import { Order } from "./order.model";
@@ -15,7 +14,6 @@ const createOrderToUpdate = async (orderData: TOrder) => {
 
   // Find the product by ID
   const product = await Product.findById(productId);
-  console.log(product)
 
   // Check if the product exists
   if (!product) {

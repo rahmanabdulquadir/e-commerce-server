@@ -38,7 +38,7 @@ const deleteProductFromDB = async (id: string) => {
 
 
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const updateProductInDB = async (id: string, productData: any) => {
   try {
     const objectId = new mongoose.Types.ObjectId(id);
