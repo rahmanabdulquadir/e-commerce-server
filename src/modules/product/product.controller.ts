@@ -1,15 +1,28 @@
 import { Request, Response } from "express";
 import { ProductServices } from "./product.service";
+import { z } from "zod";
+import ProductValidationSchema from "./product.validation";
 
 const createProduct = async (req: Request, res: Response) => {
-  const productData = req.body;
-  const result = await ProductServices.createProduct(productData);
+  
+  try {
+    const productData = req.body;
+    // validation using zod
+    const zodValidatedData = ProductValidationSchema.parse(productData);
+    const result = await ProductServices.createProduct(zodValidatedData);
 
-  res.json({
-    success: true,
-    message: "Product created successfully!",
-    data: result,
-  });
+    res.json({
+      success: true,
+      message: "Product created successfully!",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.issues[0].message || "Something went wrong",
+      error: error,
+    });
+  }
 };
 
 // get all the products
@@ -57,23 +70,22 @@ const deleteProduct = async (req: Request, res: Response) => {
     if (!result) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found',
+        message: "Product not found",
       });
     }
     res.status(200).json({
       success: true,
-      message: 'Product deleted successfully!',
+      message: "Product deleted successfully!",
       data: null,
     });
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Something went wrong',
+      message: error.message || "Something went wrong",
       error: error,
     });
   }
 };
-
 
 const searchProducts = async (req: Request, res: Response) => {
   const { searchTerm } = req.query;
@@ -103,12 +115,14 @@ const searchProducts = async (req: Request, res: Response) => {
 
 const updateProduct = async (req: Request, res: Response) => {
   const { productId } = req.params;
-  const productData = req.body;
 
   try {
+    const productData = req.body;
+    //zod validation
+    const zodValidatedData = ProductValidationSchema.parse(productData);
     const updatedProduct = await ProductServices.updateProductInDB(
       productId,
-      productData
+      zodValidatedData
     );
     if (!updatedProduct) {
       return res.status(404).json({
@@ -124,7 +138,7 @@ const updateProduct = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || "Something went wrong",
+      message: error.issues[0].message || "Something went wrong",
       error: error,
     });
   }
